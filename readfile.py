@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta, time
-from constantPath import *
+from constantPath import*
 def getCoordinate(message,j,stack):
     coordinate = {"latitude":message[j],"longitude":message[j+1]}
     stack.append(coordinate)
     return stack
 
 def readfile(path):
+    filename=getfileName(path)
     file=open(path,"r")
     linestack=[] #list of message
     message=[]
@@ -55,7 +56,7 @@ def readfile(path):
     for j in range (0,len(Dis_group)):
         writeText(Dis_group[j],Dis_groupName[j],40)
     writeText(message,"message", 0)
-    return Dis_groupName, coordinates
+    return Dis_groupName, coordinates, filename
 
 def writeText(message,name,start_position):
     nameFile = "%s.txt" % str(name)

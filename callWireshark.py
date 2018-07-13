@@ -1,6 +1,6 @@
 import subprocess
 from constantPath import *
-def callWireshark(nameFiles):
+def callWireshark(nameFiles, filename):
     DLT_key={"BCCH_BCH_148":"148",
     "BCCH_DL_149":"149",
     "PCCH_DL_150":"150",
@@ -16,8 +16,8 @@ def callWireshark(nameFiles):
         pathOutfile = root + "%s.pcap" %str(nameFile)
         disGroup.append(pathOutfile)
         subprocess.check_call([getWireshark("text2pcap.exe"),"-l",DLT_key[nameFile],"-t", "%Y-%m-%d %H:%M:%S.", pathInfile,pathOutfile])
-    path= root + "Traces.pcap"
-    pathjson=root+"Traces.txt"
+    path= root + filename+"_"+"final.pcap"#"Traces.pcap"
+    pathjson=root+filename+"_"+"json.txt"
     subprocess.check_call(
         [getWireshark("mergecap.exe"), "-w",path,disGroup[0],disGroup[1],disGroup[2]
             ,disGroup[3],disGroup[4],disGroup[5],disGroup[6]])
