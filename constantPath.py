@@ -6,7 +6,7 @@ def getPathText(name):
 def getWireshark(application):
     return "C:\\Program Files\\Wireshark\\"+application
 
-path="C:\\Users\\Trieu Hoang\\Desktop\\ZKCellTest\\network\\rennes_brest.txt"
+#path="C:\\Users\\Trieu Hoang\\Desktop\\ZKCellTest\\network\\rennes_brest.txt"
 def getfileName(path):
     return ntpath.split(os.path.splitext(path)[0])[1]
 

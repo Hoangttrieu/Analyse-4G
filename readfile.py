@@ -10,6 +10,7 @@ def readfile(path):
     file=open(path,"r")
     linestack=[] #list of message
     message=[]
+    ltePhone =[]
     BCCH_BCH_148=[]
     BCCH_DL_149=[]
     PCCH_DL_150=[]
@@ -24,12 +25,18 @@ def readfile(path):
     for line in file:
         words = line.split(",")
         line = words
-        if (line[0] == "ML"):
-            timeArr=datetime.strptime(str(line[3]), '%H:%M:%S.%f')
-            line[3] = (timeArr+ timedelta(microseconds=1)).time()
-            linestack.append(line)
-            message.append(line)
-            timeVar.append(line[3])
+        if (line[0].find("@START") != 0):
+            if (line[0].find("@END") != 0):
+                timeArr = datetime.strptime(str(line[3]), '%H:%M:%S.%f')
+                line[3] = (timeArr + timedelta(microseconds=1)).time()
+                if (line[0] == "ML"):
+                   # timeArr=datetime.strptime(str(line[3]), '%H:%M:%S.%f')
+                    #line[3] = (timeArr+ timedelta(microseconds=1)).time()
+                    linestack.append(line)
+                    message.append(line)
+                    timeVar.append(line[3]) # store the timestamp for comparing
+                if (line[0] == "PL"):
+                    ltePhone.append(line)
     # find the message MG
     coordinates=[] #latitude,longitude
 
@@ -56,7 +63,7 @@ def readfile(path):
     for j in range (0,len(Dis_group)):
         writeText(Dis_group[j],Dis_groupName[j],40)
     writeText(message,"message", 0)
-    return Dis_groupName, coordinates, filename
+    return Dis_groupName, coordinates, filename , ltePhone
 
 def writeText(message,name,start_position):
     nameFile = "%s.txt" % str(name)
@@ -64,6 +71,7 @@ def writeText(message,name,start_position):
     f = open(path, 'w')
     for mess in message:
         time=mess[2] + " " + str(mess[3])
+        #time = "2013-03-27" + " " + str(mess[3])
         f.write(time)
         f.write("\n")
         f.write("0000")
