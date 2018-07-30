@@ -2,18 +2,13 @@ import os
 import json
 import pandas as pd
 from constantPath import *
-import webbrowser
 from math import sin, cos, sqrt, atan2, radians
 from datetime import datetime
-from pprint import pprint
 import shapely.geometry as geometry
 import math
 import numpy as np
 from shapely.ops import cascaded_union,polygonize
-import pylab as pl
-import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
-from descartes import PolygonPatch
 path=os.path.abspath("..\\outputFiles\\zk_0000013797_20180404120733_test_final.txt")
 pathlte=os.path.abspath("..\\outputFiles\\zk_0000013797_20180404120733_test_LTEphone.txt")
 
@@ -173,8 +168,8 @@ for group, name in df.groupby(["cellID","PCI"]):
 print(len(cellList))
 
 #print(count)
-with open(getLeaflet("CellInformation.json"), 'w') as outfile:
-   json.dump(cellList, outfile, indent=4, separators=(',', ': '), sort_keys=False)
+#with open(getLeaflet("CellInformation.json"), 'w') as outfile:
+ #  json.dump(cellList, outfile, indent=4, separators=(',', ': '), sort_keys=False)
 #firefox=webbrowser.get('firefox')
 #print (webbrowser._browsers)
 #-------------

@@ -23,6 +23,7 @@ def readfile(path):
     Dis_groupName=["BCCH_BCH_148","BCCH_DL_149","PCCH_DL_150","CCCH_DL_151","CCCH_UL_152","DCCH_DL_153","DCCH_UL_154"]
     timeVar = []
     PCI=[]
+    earfcn=[]
     #fill the messages into list linestack
     for line in file:
         words = line.split(",")
@@ -35,6 +36,7 @@ def readfile(path):
                    # timeArr=datetime.strptime(str(line[3]), '%H:%M:%S.%f')
                     #line[3] = (timeArr+ timedelta(microseconds=1)).time()
                     PCI.append(line[20])
+                    earfcn.append(line[19])
                     linestack.append(line)
                     message.append(line)
                     timeVar.append(line[3]) # store the timestamp for comparing
@@ -67,7 +69,7 @@ def readfile(path):
         writeText(Dis_group[j],Dis_groupName[j],40)
     writeText(message,"message", 0)
     getLTEphone(ltePhone,filename)
-    return Dis_groupName, coordinates, filename,PCI
+    return Dis_groupName, coordinates, filename,PCI,earfcn
 
 def writeText(message,name,start_position):
     nameFile = "%s.txt" % str(name)
