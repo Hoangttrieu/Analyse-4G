@@ -1,0 +1,138 @@
+<html lang="en-US" xmlns="http://www.w3.org/1999/xhtml">
+   <head profile="http://gmpg.org/xfn/11">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ 
+      <link rel="stylesheet" type="text/css" href="library/leaflet/leaflet.css" />
+      
+      <script type='text/javascript' src='https://code.jquery.com/jquery-3.3.1.min.js'></script>
+      <script type='text/javascript' src='library/leaflet/leaflet.js'></script>
+	   <script type='text/javascript' src='library/turfjs/turf.min.js'></script>
+   </head>
+ 
+   <body>
+		<h1>Leaflet Example</h1> 
+		<!-- <p>Here's a map of the countries I've either lived in or travelled through for a month or more. -->
+		<div id="map" style="float: left; height: 600px; width: 1200px; border: 1px solid #AAA;"></div>
+		<div id="note" style="float: left; padding-left: 50px;"></div>
+		
+		
+		<script>
+		var map = L.map('map').setView([48.174665, -2.010904], 10);
+
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			}).addTo(map);
+			
+		var cellJsonList = [];
+		var skip = 0;
+		var take = 5;
+			
+		$(document).ready(function(){
+		
+			$.getJSON("CellInformation.json", function(jsonList) {
+				$("#note").append("<p>Cell list count: " + jsonList.length +"</p>")
+				cellJsonList = jsonList;	
+				drawCell();
+			});
+			
+			map.on('dblclick',function(e){
+				console.log('dblclick event');
+				drawCell();
+			})
+		});
+	
+		function drawCell(){
+
+				var list = cellJsonList.skiptake();
+				
+								
+				$("#note").append("<p>" + skip + " Cells were drawn</p>");
+				
+				var cellGeoList = [];
+				list.forEach(function(item){
+					cellGeoList.push(createFeatureCollection(item))
+				})
+				
+				cellGeoList.forEach(function(item){
+					
+					
+					if(item.features.length < 3){
+						
+						item.features.forEach(function (fea){
+							//console.log(item)
+							L.marker([fea.geometry.coordinates[1],fea.geometry.coordinates[0]]).addTo(map).bindPopup(item.properties).openPopup()
+							
+						})
+					}
+					else {
+						//console.log(item.properties)
+						L.geoJSON([item,turf.convex(item)]).addTo(map).bindPopup(item.properties).openPopup();
+						
+						var pointOnPolygon = turf.centroid(item);
+						
+						var lon = pointOnPolygon.geometry.coordinates[0]
+						var lat = pointOnPolygon.geometry.coordinates[1]
+						
+						//L.marker([lat,lon]).addTo(map).bindPopup(item.properties).openPopup();						
+					}
+					
+				//----------------------------------------------
+				})
+		}
+	
+		Array.prototype.skiptake = function () {
+			if (skip >= this.length) return [];
+			
+			take = this.length > (skip + take) ? take : (this.length - skip);
+			
+			var result = this.slice(skip, skip + take);
+			skip += take;
+			
+			return result;		
+		}
+		
+		function createFeatureCollection (cellGeo){
+			var features = [];
+			cellGeo.features.forEach(function(item){
+				features.push(createFeature(item.lat,item.lon))
+			})
+			var point = {
+				"type": "FeatureCollection",
+				"properties":cellGeo.property,
+				"features" : features
+			}
+			return point
+		}
+		
+		function createFeature(lat,lon){
+			var feature={
+					  "type": "Feature",
+					  "geometry": {
+						"type": "Point",
+						"coordinates": [parseFloat(lon),parseFloat(lat)]
+					  }
+					}
+			
+			return feature
+		}
+		
+					
+			
+		
+			
+		/*	// hien thi landmark tren ban do
+			var arrays = [[10.195312, 43.755225],[10.404052, 43.8424511],[10.579833, 43.659924],[10.360107, 43.516688],[10.14038, 43.588348],[10.195312, 43.755225]]
+			
+			arrays.forEach(function (item){
+			debugger;
+					
+				L.marker([item[0], item[1]]).addTo(map)
+				.bindPopup('A pretty CSS3 popup.<br> Easily customizable.') 
+				hien thi noi dung tren land mark
+				.openPopup(); 
+
+			}) */
+		</script>
+    
+   </body>
+</html>
