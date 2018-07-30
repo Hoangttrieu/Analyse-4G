@@ -9,6 +9,9 @@ def processingJson(pathnamefile,coordinates,namefile,pci,earfcn):
         frame_object=json_objects[i]["_source"]["layers"]["frame"]
        # frame_object["frame.comment"] = coordinates[i]
         frame_object["frame.comment"] = {"frame.comment.geolocation":coordinates[i],"frame.comment.PCI": pci[i],"frame.comment.EARFCN": earfcn[i]}
+=======
+        frame_object["frame.comment"] = {"frame.comment.geolocation":coordinates[i],"frame.comment.PCI": pci[i], "frame.comment.EARFCN": earfcn[i]}
+>>>>>>> 7dafbdf7a042b2a80ffc7329b60167851cbc7a0f
        # frame_object["frame.comment"] = {}
     nameFile=namefile+"_"+"final.txt"
     with open(getPathText(nameFile), 'w') as outfile:
@@ -46,7 +49,11 @@ def getLTEphone(file,namefile):
         time=str(row["Time"].strftime('%H:%M:%S.%f'))
         json_obj["current cell"]["Time"] =str(row["Date"])+" "+time
 
+<<<<<<< HEAD
         json_obj["current cell"]["Geolocation"] = {"latitude":row["Latitude"],"longitude":row["Longitude"],"Altitude":row["Altitude"]}
+=======
+        json_obj["current cell"]["Geolocation"] = {"latitude":row["Latitude"],"longitude":row["Longitude"]}
+>>>>>>> 7dafbdf7a042b2a80ffc7329b60167851cbc7a0f
         json_obj["current cell"]["Mode"]=row["Mode"]
         json_obj["current cell"]["PCI"] = row["PCI"]
         json_obj["current cell"]["EARFCN"] = row["EARFCN"]

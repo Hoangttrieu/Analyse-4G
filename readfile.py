@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, time
 from constantPath import*
 from jsonFiles import*
 def getCoordinate(message,j,stack):
-    coordinate = {"latitude":message[j],"longitude":message[j+1],"Altitude":message[j+6]}
+    coordinate = {"latitude":message[j],"longitude":message[j+1]}#,"Altitude":message[j+6]}
     stack.append(coordinate)
     return stack
 
@@ -10,7 +10,7 @@ def readfile(path):
     filename=getfileName(path)
     file=open(path,"r")
     linestack=[] #list of message
-    message=[]
+   # message=[]
     ltePhone =[]
     BCCH_BCH_148=[]
     BCCH_DL_149=[]
@@ -33,12 +33,10 @@ def readfile(path):
                 timeArr = datetime.strptime(str(line[3]), '%H:%M:%S.%f')
                 line[3] = (timeArr + timedelta(microseconds=1)).time()
                 if (line[0] == "ML"):
-                   # timeArr=datetime.strptime(str(line[3]), '%H:%M:%S.%f')
-                    #line[3] = (timeArr+ timedelta(microseconds=1)).time()
                     PCI.append(line[20])
                     earfcn.append(line[19])
                     linestack.append(line)
-                    message.append(line)
+                   # message.append(line)
                     timeVar.append(line[3]) # store the timestamp for comparing
                 if (line[0] == "PL"):
                     ltePhone.append(line)
@@ -67,7 +65,7 @@ def readfile(path):
             DCCH_UL_154.append(linestack[i])
     for j in range (0,len(Dis_group)):
         writeText(Dis_group[j],Dis_groupName[j],40)
-    writeText(message,"message", 0)
+    #writeText(message,"message", 0)
     getLTEphone(ltePhone,filename)
     return Dis_groupName, coordinates, filename,PCI,earfcn
 
