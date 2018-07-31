@@ -6,4 +6,4 @@ def __main__(pathfile):
     pathjson=callWireshark(groupname,filename)
     processingJson(pathjson,coordinates,filename,pci,earfcn)
 
-__main__(r"C:\Users\Trieu Hoang\Desktop\ZKCellTest\RennesBrestVoiture\zk_0000013797_20180404120733_test.txt")
+__main__(r"C:\Users\trieuhoang\Desktop\document\Documentations\zk_0000013797_20180731144127.txt")

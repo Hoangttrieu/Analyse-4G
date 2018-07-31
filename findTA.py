@@ -168,8 +168,8 @@ for group, name in df.groupby(["cellID","PCI"]):
 print(len(cellList))
 
 #print(count)
-#with open(getLeaflet("CellInformation.json"), 'w') as outfile:
- #  json.dump(cellList, outfile, indent=4, separators=(',', ': '), sort_keys=False)
+with open(getLeaflet("CellInformation.json"), 'w') as outfile:
+  json.dump(cellList, outfile, indent=4, separators=(',', ': '), sort_keys=False)
 #firefox=webbrowser.get('firefox')
 #print (webbrowser._browsers)
 #-------------

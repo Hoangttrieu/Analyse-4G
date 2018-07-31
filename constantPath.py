@@ -4,7 +4,7 @@ def getPathText(name):
    # return "C:\\Users\\Trieu Hoang\\Desktop\\ZKCellTest\\network\\" + name
     return os.path.abspath("..\\outputFiles\\" + name)
 def getLeaflet(name):
-    return os.path.abspath("..\\..\\leaflet\\" + name)
+    return os.path.abspath("..\\Analyse-4G\\leaflet\\" + name)
 def getWireshark(application):
     return "C:\\Program Files\\Wireshark\\"+application
 

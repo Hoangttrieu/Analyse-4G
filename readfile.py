@@ -40,7 +40,7 @@ def readfile(path):
                     timeVar.append(line[3]) # store the timestamp for comparing
                 if (line[0] == "PL"):
                     ltePhone.append(line)
-    # find the message MG
+
     coordinates=[] #latitude,longitude
 
     for i in range(0,len(linestack)):
@@ -68,6 +68,8 @@ def readfile(path):
     #writeText(message,"message", 0)
     getLTEphone(ltePhone,filename)
     return Dis_groupName, coordinates, filename,PCI,earfcn
+
+
 
 def writeText(message,name,start_position):
     nameFile = "%s.txt" % str(name)
