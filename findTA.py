@@ -2,16 +2,67 @@ import os
 import json
 import pandas as pd
 from constantPath import *
-import webbrowser
 from math import sin, cos, sqrt, atan2, radians
 from datetime import datetime
-from pprint import pprint
 import shapely.geometry as geometry
 import math
 import numpy as np
 from shapely.ops import cascaded_union,polygonize
-path=os.path.abspath("..\\outputFiles\\zk_0000013797_20180404120733_test_final.txt")
-pathlte=os.path.abspath("..\\outputFiles\\zk_0000013797_20180404120733_test_LTEphone.txt")
+from scipy.spatial import Delaunay
+path=os.path.abspath("..\\outputFiles\\zk_0000013797_20180802094559_final_phone_1.txt")
+pathlte=os.path.abspath("..\\outputFiles\\zk_0000013797_20180802094559_LTEphone_phone_1.txt")
+
+def concave_hull(points):
+    alpha=1.5
+    if len(points)<4:
+        return geometry.MultiPoint(list(points)).convex_hull
+
+    def add_edge(edges, edge_points, coords, i, j):
+        """
+        Add a line between the i-th and j-th points,
+        if not in the list already
+        """
+        if (i, j) in edges or (j, i) in edges:
+            # already added
+            return
+        edges.add((i, j))
+        edge_points.append(coords[[i, j]])
+
+
+    coords = np.array([point.coords[0]
+                   for point in points])
+    tri = Delaunay(coords)
+    edges = set()
+    edge_points = []
+    # loop over triangles:
+    # ia, ib, ic = indices of corner points of the
+    # triangle
+    for ia, ib, ic in tri.vertices:
+        pa = coords[ia]
+        pb = coords[ib]
+        pc = coords[ic]
+        # Lengths of sides of triangle
+        a = math.sqrt((pa[0] - pb[0]) ** 2 + (pa[1] - pb[1]) ** 2)
+        b = math.sqrt((pb[0] - pc[0]) ** 2 + (pb[1] - pc[1]) ** 2)
+        c = math.sqrt((pc[0] - pa[0]) ** 2 + (pc[1] - pa[1]) ** 2)
+        # Semiperimeter of triangle
+        s = (a + b + c) / 2.0
+        # Area of triangle by Heron's formula
+        area = math.sqrt(s * (s - a) * (s - b) * (s - c))
+
+        if area !=0:
+            circum_r = (a * b * c )/ (4.0 * area)
+            # Here's the radius filter.
+            # print circum_r
+            if circum_r < 1.0 / alpha:
+                add_edge(edges, edge_points, coords, ia, ib)
+                add_edge(edges, edge_points, coords, ib, ic)
+                add_edge(edges, edge_points, coords, ic, ia)
+        else:print(area)
+    m = geometry.MultiLineString(edge_points)
+    triangles = list(polygonize(m))
+    return cascaded_union(triangles)
+
 
 def getJsonfile(path):
     df= pd.DataFrame({"TAC":[],"CellID":[],"PCI":[],"EARFCN":[],"geolocation":[]})
@@ -57,18 +108,17 @@ def getMesurementFile(pathLTE):
         earfcn=json_ltes[mersurement]["current cell"]["EARFCN"]
         df3 = pd.DataFrame({ "PCI": [pci],"EARFCN":[earfcn], "Geolocation": [geolocation]})
         df=df.append(df3,ignore_index=True)
-    #df=(df.sort_values("Time")).reset_index(drop=True)
     pciEarfcnTable=df.groupby(["PCI","EARFCN"])
     return pciEarfcnTable
 
 TACtable = getJsonfile(path)
 pciEarfcnTable= getMesurementFile(pathlte)
-#print(pciEarfcnTable.groups.keys())
-#print(TACtable.last())
-#print(TACtable.get_group(('0d:ac', '64:3c:a5:10')).groupby(["PCI","EARFCN"]).last())
+print(TACtable.get_group(("38:a2", "0d:e3:60:10")).shape)
+print(TACtable.get_group(("38:a2", "0d:e3:60:10")).reset_index(drop=True))
 df=pd.DataFrame({"cellID":[],"PCI":[],"EARFCN":[],"Geolocation":[]})
 
 for tacTable in TACtable.groups.keys():
+
     (tac,cell)=tacTable
     geoloc=[]
     pciGroupbytable=TACtable.get_group((tacTable)).groupby(["PCI","EARFCN"])
@@ -90,112 +140,41 @@ for tacTable in TACtable.groups.keys():
         geoloc=geoloc+buffgeo
     df4=pd.DataFrame({"cellID":[tacTable],"PCI":[pci],"EARFCN":[earfcn],"Geolocation":[geoloc]})
     df=df.append(df4,ignore_index=True)
-# write file for leaflet
-cellList=[]
-test=[]
 
-#listpoints=[]
+cellList=[]
+
 for group, name in df.groupby(["cellID","PCI"]):
+    ((a,b),c)=group
+    print(a)
     gr=df.groupby(["cellID","PCI"]).get_group(group)
 
     (tac,cellid)=list(gr["cellID"])[0]
     cell={"property":str((tac,cellid,list(gr["PCI"])[0],list(gr["EARFCN"])[0])),
     "features":[]}
     listGeo=list((df.groupby(["cellID","PCI"])).get_group(group)["Geolocation"])[0]
-    test.append(listGeo)
     points=[]
-    #lat=[float(geolocation["latitude"]) for geolocation in listGeo]
-    #lon = [float(geolocation["longitude"]) for geolocation in listGeo]
-    #points=geometry.Point(lat,lon)
-    #x, y = concave.exterior.coords.xy
-    for geolocation in listGeo:
-        latitude = geolocation["latitude"]
-        longitude = geolocation["longitude"]
-        cell["features"].append({"lat":latitude,"lon":longitude})
-        points.append(geometry.Point(float(latitude),float(longitude)))
-    cellList.append(cell)
-   # concave = concave_hull(points)
-   # x, y = concave.exterior.coords.xy
-    #listpoints.append(points)
+    lat=[float(geolocation["latitude"]) for geolocation in listGeo]
+    lon = [float(geolocation["longitude"]) for geolocation in listGeo]
+    if len(lat)==1:
+        cell["features"].append({"lat": str(lat[0]), "lon": str(lon[0])})
+        cellList.append(cell)
+    elif len(lat)==2:
+        cell["features"].append({"lat": str(lat[0]), "lon": str(lon[0])})
+        cell["features"].append({"lat": str(lat[1]), "lon": str(lon[1])})
+        cellList.append(cell)
+    else:
+        points = [geometry.Point(lat[i], lon[i]) for i in range(len(lat))]
+        concave = concave_hull(points)
+        x, y = concave.exterior.coords.xy
+        for i in range(len(list(x))):
+            cell["features"].append({"lat": str(list(x)[i]), "lon": str(list(y)[i])})
+        cellList.append(cell)
+print(len(cellList))
 
 #print(count)
 with open(getLeaflet("CellInformation.json"), 'w') as outfile:
-   json.dump(cellList, outfile, indent=4, separators=(',', ': '), sort_keys=False)
+  json.dump(cellList, outfile, indent=4, separators=(',', ': '), sort_keys=False)
 #firefox=webbrowser.get('firefox')
 #print (webbrowser._browsers)
 #-------------
-import pylab as pl
-import matplotlib.pyplot as plt
-from scipy.spatial import Delaunay
-from descartes import PolygonPatch
-#x = [p.coords.xy[0] for p in listpoints[6]]
-#y = [p.coords.xy[1] for p in listpoints[6]]
-
-def plot_polygon(polygon):
-    fig = pl.figure(figsize=(10,10))
-    ax = fig.add_subplot(111)
-    x_min, y_min, x_max, y_max = polygon.bounds
-    ax.set_xlim([x_min, x_max])
-    ax.set_ylim([y_min, y_max])
-    patch = PolygonPatch(polygon, fc='#999999',
-                         ec='#000000', fill=True,
-                         zorder=-1)
-    ax.add_patch(patch)
-    return fig
-def concave_hull(points):
-    alpha=1
-    if len(points)<4:
-        return geometry.MultiPoint(list(points)).convex_hull
-
-    def add_edge(edges, edge_points, coords, i, j):
-        """
-        Add a line between the i-th and j-th points,
-        if not in the list already
-        """
-        if (i, j) in edges or (j, i) in edges:
-            # already added
-            return
-        edges.add((i, j))
-        edge_points.append(coords[[i, j]])
-
-
-    coords = np.array([point.coords[0]
-                   for point in points])
-    tri = Delaunay(coords)
-    edges = set()
-    edge_points = []
-    # loop over triangles:
-    # ia, ib, ic = indices of corner points of the
-    # triangle
-    for ia, ib, ic in tri.vertices:
-        pa = coords[ia]
-        pb = coords[ib]
-        pc = coords[ic]
-        # Lengths of sides of triangle
-        a = math.sqrt((pa[0] - pb[0]) ** 2 + (pa[1] - pb[1]) ** 2)
-        b = math.sqrt((pb[0] - pc[0]) ** 2 + (pb[1] - pc[1]) ** 2)
-        c = math.sqrt((pc[0] - pa[0]) ** 2 + (pc[1] - pa[1]) ** 2)
-        # Semiperimeter of triangle
-        s = (a + b + c) / 2.0
-        # Area of triangle by Heron's formula
-        area = math.sqrt(s * (s - a) * (s - b) * (s - c))
-        circum_r = a * b * c / (4.0 * area)
-        # Here's the radius filter.
-        # print circum_r
-        if circum_r < 1.0 / alpha:
-            add_edge(edges, edge_points, coords, ia, ib)
-            add_edge(edges, edge_points, coords, ib, ic)
-            add_edge(edges, edge_points, coords, ic, ia)
-    m = geometry.MultiLineString(edge_points)
-    triangles = list(polygonize(m))
-    return cascaded_union(triangles)
-#concave=concave_hull(listpoints[6])
-#x,y=concave.exterior.coords.xy
-#print(len(x))
-#print(len(y))
-#print(len(listpoints[6]))
-#poin_collection=geometry.MultiPoint(list(listpoints[6]))
-#plot_polygon(concave)
-#pl.plot(x,y,'o', color='#f16824')
-#pl.show()
 

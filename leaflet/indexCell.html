@@ -66,14 +66,14 @@
 					}
 					else {
 						//console.log(item.properties)
-						L.geoJSON([item,turf.convex(item)]).addTo(map).bindPopup(item.properties).openPopup();
+						L.geoJSON([turf.convex(item)]).addTo(map).bindPopup(item.properties).openPopup();
 						
 						var pointOnPolygon = turf.centroid(item);
 						
 						var lon = pointOnPolygon.geometry.coordinates[0]
 						var lat = pointOnPolygon.geometry.coordinates[1]
 						
-						//L.marker([lat,lon]).addTo(map).bindPopup(item.properties).openPopup();						
+						L.marker([lat,lon]).addTo(map).bindPopup(item.properties).openPopup();						
 					}
 					
 				//----------------------------------------------

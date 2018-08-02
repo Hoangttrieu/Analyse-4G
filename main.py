@@ -3,7 +3,7 @@ from jsonFiles import *
 from callWireshark import *
 
 from PhoneId import*
-
+from traceMap import*
 def __main__(pathfile):
   #  groupname,coordinates,filename,pci,earfcn=readfile(pathfile)
   #  pathjson=callWireshark(groupname,filename)
@@ -30,5 +30,9 @@ def __main__(pathfile):
       pathjson=MLmessages.callWireshark(groupname,filename,operaters[oper])
       MLmessages.processingJson(pathjson,filename,operaters[oper])
       PLmessages.writeLTEphoneJson(PLmessages.getMessages(),filename,operaters[oper])
-__main__(r"C:\Users\Trieu Hoang\Desktop\ZKCellTest\zk_0000013797_20180731144127.txt")
+      trace=traceFromJson(filename,operaters[oper])
+      TACtable = trace.createTactable()
+      pcitable = trace.createPCItable()
+      trace.cellInfo(TACtable, pcitable, operaters[oper])
+__main__(r"C:\Users\trieuhoang\Desktop\document\Documentations\zk_0000013797_20180802094559.txt")
 
