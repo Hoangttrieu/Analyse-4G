@@ -23,13 +23,12 @@ def __main__(pathfile):
                      operaters[phoneid].setMessages(line)
                  else:
                      operaters[phoneid].setMessages(line)
-
-
-
   for oper in operaters.keys():
       MLmessages = mlMessageList()
-      groupname=operaters[oper].writejsonMessage(operaters[oper],MLmessages)
-      MLmessages.callWireshark(groupname,filename,operaters[oper])
-
-__main__(r"C:\Users\trieuhoang\Desktop\document\Documentations\zk_0000013797_20180731144127.txt")
+      PLmessages=plMessages()
+      groupname=operaters[oper].writejsonMessage(operaters[oper],MLmessages,PLmessages)
+      pathjson=MLmessages.callWireshark(groupname,filename,operaters[oper])
+      MLmessages.processingJson(pathjson,filename,operaters[oper])
+      PLmessages.writeLTEphoneJson(PLmessages.getMessages(),filename,operaters[oper])
+__main__(r"C:\Users\Trieu Hoang\Desktop\ZKCellTest\zk_0000013797_20180731144127.txt")
 
