@@ -9,8 +9,8 @@ import math
 import numpy as np
 from shapely.ops import cascaded_union,polygonize
 from scipy.spatial import Delaunay
-path=os.path.abspath("..\\outputFiles\\zk_0000013797_20180802094559_final_phone_1.txt")
-pathlte=os.path.abspath("..\\outputFiles\\zk_0000013797_20180802094559_LTEphone_phone_1.txt")
+path=os.path.abspath("..\\outputFiles\\zk_0000013797_20180731144127.txt")
+pathlte=os.path.abspath("..\\outputFiles\\zk_0000013797_20180731144127_lte.txt")
 
 def concave_hull(points):
     alpha=1.5

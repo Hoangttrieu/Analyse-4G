@@ -5,6 +5,12 @@ from datetime import datetime
 from constantPath import*
 import shapely.geometry as geometry
 from PhoneId import*
+
+import numpy as np
+from shapely.ops import cascaded_union,polygonize
+from scipy.spatial import Delaunay
+from math import sin, cos, sqrt, atan2, radians
+
 class traceFromJson:
 
     def __init__(self,file,oper):
@@ -31,7 +37,9 @@ class traceFromJson:
                                         "geolocation": [coord]})
                     df = df.append(df1, ignore_index=True)
                     TACtable = df.groupby(["TAC", "CellID"],as_index=False)
+
         return TACtable
+
 
     def createPCItable(self):
         df = pd.DataFrame({"PCI": [], "EARFCN": [], "Geolocation": []})
@@ -49,37 +57,44 @@ class traceFromJson:
     def cellInfo(self,TACtable,pciEarfcnTable,oper):
         df = pd.DataFrame({"cellID": [], "PCI": [], "EARFCN": [], "Geolocation": []})
         for tacTable in TACtable.groups.keys():
-            print(TACtable.get_group((("38:a2", "0d:a3:a0:10"))).reset_index(drop=True).loc[1]["geolocation"])
+
             for group, name in TACtable.get_group((tacTable)).groupby(["PCI", "EARFCN"]):
                 pci,earfcn=group
                 rowNum,colsNum=(TACtable.get_group((tacTable)).groupby(["PCI", "EARFCN"])).get_group((group)).shape
+                pointc=geometry.Point(0,0)
                 if rowNum>1:
                     for i in range(1,rowNum):
                         pointA =(TACtable.get_group((tacTable)).groupby(["PCI", "EARFCN"])).get_group((group)).iloc[i-1]["geolocation"]
+                        pointc=pointA
                         pointB = (TACtable.get_group((tacTable)).groupby(["PCI", "EARFCN"])).get_group((group)).iloc[i]["geolocation"]
-                        if pointA.distance(pointB)>0.01:
+
+                        if pointA.distance(pointB)>0:
                             df4 = pd.DataFrame(
                                 {"cellID": [tacTable], "PCI": [pci], "EARFCN": [earfcn], "Geolocation": [pointA]})
                             df = df.append(df4, ignore_index=True)
-                print(pciEarfcnTable.groups.keys())
-                print((pci,earfcn))
                 if ((pci,earfcn)) in pciEarfcnTable.groups.keys():
-                    (rownum, colsnum) = TACtable.get_group((tacTable)).shape
-                    for i in range(rownum):
-                        pointC = (TACtable.get_group((tacTable)).groupby(["PCI", "EARFCN"])).get_group((group)).iloc[[0]]["geolocation"]
-                        pointD = pciEarfcnTable.get_group((pci, earfcn)).iloc[i]["geolocation"]
-                        if (pointC.distance(pointD)<14):
+                    (rownum, colsnum) = (pciEarfcnTable.get_group((pci,earfcn))).shape
+                    for i in range(0,rownum):
+                        #pointC=(TACtable.get_group((tacTable)).groupby(["PCI", "EARFCN"])).get_group((group)).iloc[i - 1]["geolocation"]
+                        pointD = pciEarfcnTable.get_group((pci, earfcn)).iloc[i]["Geolocation"]
+                        if (pointc.distance(pointD)<14):
                             df4 = pd.DataFrame({"cellID": [tacTable], "PCI": [pci], "EARFCN": [earfcn], "Geolocation": [pointD]})
                             df = df.append(df4, ignore_index=True)
         cellList=[]
+        Points=[]
         for group, name in df.groupby(["cellID", "PCI"]):
-            gr=pd.DataFrame(df.groupby(["cellID", "PCI"],as_index=False))
+            gr=df.groupby(["cellID", "PCI"]).get_group(group)
             ((tac, cellid),pci) = group
-            cell = {"property": str((tac, cellid, pci, gr.iloc[[0]]["EARFCN"])),
+            cell = {"property": str((tac, cellid, pci, list(gr.iloc[[0]]["EARFCN"])[0])),
                     "features": []}
-            listGeo = list((df.groupby(["cellID", "PCI"])).get_group(group)["Geolocation"])[0]
+            points=[]
             for index,row in gr.iterrows():
-                cell["features"].append({"lat":(row["Geolocation"][0]), "lon": str(row["Geolocation"][0])})
-                cellList.append(cell)
+                cell["features"].append({"lat":str(row["Geolocation"].x), "lon": str(row["Geolocation"].y)})
+                points.append(row["Geolocation"])
+            cellList.append(cell)
+            #----------------------------
+            convex=geometry.MultiPoint(list(points)).convex_hull
+            #-----------------------------
+
         with open(getLeaflet("CellInformation""_"+oper.getOperater()+".json"), 'w') as outfile:
             json.dump(cellList, outfile, indent=4, separators=(',', ': '), sort_keys=False)
