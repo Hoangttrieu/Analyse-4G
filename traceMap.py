@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from constantPath import*
 import shapely.geometry as geometry
+from shapely.geometry import point,polygon
 from PhoneId import*
 
 import numpy as np
@@ -18,7 +19,7 @@ class traceFromJson:
         self.jsonSystemInfoName = os.path.abspath("..\\outputFiles\\"+ file + "_" + "final"+ "_"+oper.getOperater()+".txt")
 
     def createTactable(self):
-        df = pd.DataFrame({"TAC": [], "CellID": [], "PCI": [], "EARFCN": [], "geolocation": []})
+        df = pd.DataFrame({"TAC": [], "CellID": [], "PCI": [], "EARFCN": [], "geolocation": [],"mcc":[],"mnc":[]})
         jsonObject = open(self.jsonSystemInfoName)
         json_objects = json.load(jsonObject)
         for jsonfile in json_objects:
@@ -29,12 +30,29 @@ class traceFromJson:
                 if sib1 == "lte-rrc.systemInformationBlockType1_element":
                     trackingAreaCode = typemess[sib1]["lte-rrc.cellAccessRelatedInfo_element"][
                         "lte-rrc.trackingAreaCode"]
+                    mccdigit1=typemess[sib1]["lte-rrc.cellAccessRelatedInfo_element"][
+                        "lte-rrc.plmn_IdentityList_tree"]["Item 0"]["lte-rrc.PLMN_IdentityInfo_element"][
+                        "lte-rrc.plmn_Identity_element"]["lte-rrc.mcc_tree"]["Item 0"]["lte-rrc.MCC_MNC_Digit"]
+                    mccdigit2 = typemess[sib1]["lte-rrc.cellAccessRelatedInfo_element"][
+                        "lte-rrc.plmn_IdentityList_tree"]["Item 0"]["lte-rrc.PLMN_IdentityInfo_element"][
+                        "lte-rrc.plmn_Identity_element"]["lte-rrc.mcc_tree"]["Item 1"]["lte-rrc.MCC_MNC_Digit"]
+                    mccdigit3 = typemess[sib1]["lte-rrc.cellAccessRelatedInfo_element"][
+                        "lte-rrc.plmn_IdentityList_tree"]["Item 0"]["lte-rrc.PLMN_IdentityInfo_element"][
+                        "lte-rrc.plmn_Identity_element"]["lte-rrc.mcc_tree"]["Item 2"]["lte-rrc.MCC_MNC_Digit"]
+                    mncdigit1=mccdigit1=typemess[sib1]["lte-rrc.cellAccessRelatedInfo_element"][
+                        "lte-rrc.plmn_IdentityList_tree"]["Item 0"]["lte-rrc.PLMN_IdentityInfo_element"][
+                        "lte-rrc.plmn_Identity_element"]["lte-rrc.mnc_tree"]["Item 0"]["lte-rrc.MCC_MNC_Digit"]
+                    mncdigit2 = mccdigit1 = typemess[sib1]["lte-rrc.cellAccessRelatedInfo_element"][
+                        "lte-rrc.plmn_IdentityList_tree"]["Item 0"]["lte-rrc.PLMN_IdentityInfo_element"][
+                        "lte-rrc.plmn_Identity_element"]["lte-rrc.mnc_tree"]["Item 1"]["lte-rrc.MCC_MNC_Digit"]
+                    mcc=mccdigit1+mccdigit2+mccdigit3
+                    mnc=mncdigit1+mncdigit2
                     cellId = typemess[sib1]["lte-rrc.cellAccessRelatedInfo_element"]["lte-rrc.cellIdentity"]
                     pci = dissector["frame"]["frame.comment"]["frame.comment.PCI"]
                     earfcn = dissector["frame"]["frame.comment"]["frame.comment.EARFCN"]
                     coord = geometry.Point(float(dissector["frame"]["frame.comment"]["frame.comment.geolocation"]["latitude"]),float(dissector["frame"]["frame.comment"]["frame.comment.geolocation"]["longitude"]))
                     df1 = pd.DataFrame({"TAC": [trackingAreaCode], "CellID": [cellId], "PCI": [pci], "EARFCN": [earfcn],
-                                        "geolocation": [coord]})
+                                        "geolocation": [coord],"mcc":[mcc],"mnc":[mnc]})
                     df = df.append(df1, ignore_index=True)
                     TACtable = df.groupby(["TAC", "CellID"],as_index=False)
 
@@ -89,11 +107,19 @@ class traceFromJson:
                     "features": []}
             points=[]
             for index,row in gr.iterrows():
-                cell["features"].append({"lat":str(row["Geolocation"].x), "lon": str(row["Geolocation"].y)})
+                #cell["features"].append({"lat":str(row["Geolocation"].x), "lon": str(row["Geolocation"].y)})
                 points.append(row["Geolocation"])
-            cellList.append(cell)
+            #cellList.append(cell)
+
             #----------------------------
             convex=geometry.MultiPoint(list(points)).convex_hull
+            for point in points:
+                if point.within(convex)==True:
+                    cell["features"].append({"lat": str(point.x), "lon": str(point.y),"prop":"inside"})
+                else:
+                    cell["features"].append({"lat": str(point.x), "lon": str(point.y), "prop": "border"})
+            cellList.append(cell)
+
             #-----------------------------
 
         with open(getLeaflet("CellInformation""_"+oper.getOperater()+".json"), 'w') as outfile:

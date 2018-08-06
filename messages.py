@@ -133,6 +133,22 @@ class mlMessageList:
             f.write("\n")
         f.close()
 
+    def writeTAList(self,TACtable,oper):
+       # nameFile = "%s.txt" % str(name+oper.getOperater())
+        path = getPathText(str(name)+".txt")
+        f = open(path, 'w')
+        for mess in message_list:
+            time = mess[2] + " " + str(mess[3])
+            # time = "2013-03-27" + " " + str(mess[3])
+            f.write(time)
+            f.write("\n")
+            f.write("0000")
+            for j in range(start_position, len(mess)):
+                f.write(" ")
+                f.write(str(mess[j]))
+            f.write("\n")
+        f.close()
+
 
 class plMessages():
     def __init__(self):

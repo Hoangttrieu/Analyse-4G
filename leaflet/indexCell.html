@@ -19,25 +19,27 @@
 		<script>
 		var map = L.map('map').setView([48.174665, -2.010904], 10);
 
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-			}).addTo(map);
+		//L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		//	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			//}).addTo(map);
+		L.tileLayer('http://localhost:32769/styles/klokantech-basic/{z}/{x}/{y}.png',{ attribution: '&copy; <a href="http://www.openstreetmap.org/about/">OpenStreetMap</a>; contributors' }).addTo(map)
 			
 		var cellJsonList = [];
 		var skip = 0;
-		var take = 5;
+		var take = 1;
+		
 			
 		$(document).ready(function(){
 		
-			$.getJSON("CellInformation.json", function(jsonList) {
+			$.getJSON("CellInformation_phone_1.json", function(jsonList) {
 				$("#note").append("<p>Cell list count: " + jsonList.length +"</p>")
 				cellJsonList = jsonList;	
 				drawCell();
 			});
 			
 			map.on('dblclick',function(e){
-				console.log('dblclick event');
 				drawCell();
+				console.log('dblclick event');
 			})
 		});
 	
@@ -51,6 +53,7 @@
 				var cellGeoList = [];
 				list.forEach(function(item){
 					cellGeoList.push(createFeatureCollection(item))
+					
 				})
 				
 				cellGeoList.forEach(function(item){
@@ -66,19 +69,22 @@
 					}
 					else {
 						//console.log(item.properties)
-						L.geoJSON([turf.convex(item)]).addTo(map).bindPopup(item.properties).openPopup();
+						L.geoJSON([item,turf.concave(item)]).addTo(map).bindPopup(item.properties).openPopup();
 						
 						var pointOnPolygon = turf.centroid(item);
 						
 						var lon = pointOnPolygon.geometry.coordinates[0]
 						var lat = pointOnPolygon.geometry.coordinates[1]
 						
-						L.marker([lat,lon]).addTo(map).bindPopup(item.properties).openPopup();						
+						//L.marker([lat,lon]).addTo(map).bindPopup(item.properties).openPopup();						
 					}
 					
 				//----------------------------------------------
 				})
 		}
+		
+		
+		
 	
 		Array.prototype.skiptake = function () {
 			if (skip >= this.length) return [];
@@ -104,9 +110,10 @@
 			return point
 		}
 		
-		function createFeature(lat,lon){
+		function createFeature(lat,lon,prop){
 			var feature={
 					  "type": "Feature",
+					  
 					  "geometry": {
 						"type": "Point",
 						"coordinates": [parseFloat(lon),parseFloat(lat)]

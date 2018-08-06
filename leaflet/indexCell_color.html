@@ -7,6 +7,17 @@
       <script type='text/javascript' src='https://code.jquery.com/jquery-3.3.1.min.js'></script>
       <script type='text/javascript' src='library/leaflet/leaflet.js'></script>
 	   <script type='text/javascript' src='library/turfjs/turf.min.js'></script>
+	   <style>
+		.custom-icon {
+		  width: 3rem;
+		  height: 3rem;
+		  display: block;
+		  position: relative;
+		  border-radius: 3rem 3rem 0;
+		  transform: rotate(45deg);
+		  border: 1px solid #FFFFFF
+		}
+	   </style>
    </head>
  
    <body>
@@ -19,76 +30,95 @@
 		<script>
 		var map = L.map('map').setView([48.174665, -2.010904], 10);
 
+		//L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		//	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			//}).addTo(map);
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			}).addTo(map);
 			
 		var cellJsonList = [];
 		var skip = 0;
-		var take = 20;
+		var take = 1;
 		var point = {
 				"type": "FeatureCollection",
 				"properties":"",
 				"features" : []
 			}
+		var markerGroup = L.layerGroup();
+		
+
+		const icon = L.divIcon({
+		  className: 'leaflet-div-icon custom-icon',
+		  iconAnchor: [0, 24],
+		  labelAnchor: [-6, 0],
+		  popupAnchor: [0, -36],
+		 // html: `<span style="${markerHtmlStyles}" />`
+		})
+		
+		L.marker([48.174665, -2.010904], {icon: icon}).addTo(map);
+		
+		
 		
 		$(document).ready(function(){
-		var markerGroup = L.layerGroup();
-		var pointinside = [];
-		var markers = L.MarkerClusterGroup()
-			$.getJSONorder("jsontest.json", function(jsonList) {
-				
+			
+			$.getJSON("CellInformation_phone_2.json", function(jsonList) {
+				$("#note").append("<p>Cell list count: " + jsonList.length +"</p>")
 				cellJsonList = jsonList;	
-				var cellGeoList=[];
-				var pointborder=[]
+				drawCell();
+			});
+			
+			map.on('dblclick',function(e){
+				map.removeLayer(markerGroup)
 				
-				cellJsonList.forEach(function(item){
+					drawCell();
+					console.log('dblclick event');
 					
+			})
+		});
+	
+		function drawCell(){
+			
+				var list = cellJsonList.skiptake();
+				var pointinside=[];
+				var pointborder=[];
+				markerGroup.clearLayers();				
+				$("#note").append("<p>" + skip + " Cells were drawn</p>");
+				map.removeLayer(markerGroup)
+				var cellGeoList = [];
+				list.forEach(function(item){
 					cellGeoList.push(createFeatureCollection(item))
 					points=createpolygon(item)
-					
 					pointinside.push(points[0])
 					pointborder.push(points[1])
-					
 				})
-	
 				pointinside.forEach(function(item){	
-						item.features.forEach(function (fea){
+					item.features.forEach(function (fea){
 					L.marker([fea.geometry.coordinates[1],fea.geometry.coordinates[0]]).addTo(markerGroup)
-						//	console.log(fea)
-							//createpolygon(fea,pointBorder)
-						//	L.marker([fea.geometry.coordinates[1],fea.geometry.coordinates[0]]).addTo(map)
-						//	console.log(createpolygon(fea,pointBorder))
-						})	
-				//----------------------------------------------
+					})	
 				})
-				pointborder.forEach(function(item){	
-					//console.log(item)
-					L.geoJSON([turf.convex(item)],{style: style}).addTo(map);
-				//	markers.addLayer(L.marker([item.geometry.coordinates[1],item.geometry.coordinates[0]]))
-				})
-				//map.addLayer(markers)
-			});
-						markerGroup.addTo(map)
-						
-						map.on('dblclick',function(e){
-							//console.log(markerGroup)
-							map.removeLayer(markerGroup)
-							console.log('dblclick event');
-				})
-		});
+				pointborder.forEach(function(item){
+				
+					L.geoJSON([item,turf.concave(item)],{style: style}).addTo(map).bindPopup(item.properties).openPopup();
 
-	
-		Array.prototype.skiptake = function () {
-			if (skip >= this.length) return [];
-			
-			take = this.length > (skip + take) ? take : (this.length - skip);
-			
-			var result = this.slice(skip, skip + take);
-			skip += take;
-			
-			return result;		
+				})
+				markerGroup.addTo(map)
 		}
+		
+		
+		
+		function style() {
+			rand=Math.random()
+			return {
+			weight: 2,
+			opacity: 1,
+			color: '#'+(0x1000000+(rand)*0xffffff).toString(16).substr(1,6),
+			dashArray: '5',
+			fillOpacity: 0.6,
+			fillColor: '#'+(0x1000000+(rand)*0xffffff).toString(16).substr(1,6)
+			};
+		}
+		
 		function createpolygon(cellGeo){
 			var Border=[]; 
 			var Inside=[];
@@ -109,24 +139,22 @@
 			return [pointInside,pointBorder]
 		}
 		
-		
-		function style() {
-			var rand=Math.random()
-			return {
-			weight: 2,
-			opacity: 1,
-			color: '#'+(0x1000000+(rand)*0xffffff).toString(16).substr(1,6),
-			dashArray: '3',
-			fillOpacity: 0.6,
-			fillColor: '#'+(0x1000000+(rand)*0xffffff).toString(16).substr(1,6)
-			};
+	
+		Array.prototype.skiptake = function () {
+			if (skip >= this.length) return [];
+			
+			take = this.length > (skip + take) ? take : (this.length - skip);
+			
+			var result = this.slice(skip, skip + take);
+			skip += take;
+			
+			return result;		
 		}
 		
 		function createFeatureCollection (cellGeo){
 			var features = [];
-			var properties=""
 			cellGeo.features.forEach(function(item){
-				features.push(createFeature(item.lat,item.lon,item.prop))
+				features.push(createFeature(item.lat,item.lon))
 			})
 			poin=Object.create(point)
 			poin.properties=cellGeo.property
@@ -137,8 +165,8 @@
 		function createFeature(lat,lon,prop){
 			var feature={
 					  "type": "Feature",
-					  "property":prop,
-					  "geometry":{
+					  
+					  "geometry": {
 						"type": "Point",
 						"coordinates": [parseFloat(lon),parseFloat(lat)]
 					  }
@@ -147,22 +175,6 @@
 			return feature
 		}
 		
-					
-			
-		
-			
-		/*	// hien thi landmark tren ban do
-			var arrays = [[10.195312, 43.755225],[10.404052, 43.8424511],[10.579833, 43.659924],[10.360107, 43.516688],[10.14038, 43.588348],[10.195312, 43.755225]]
-			
-			arrays.forEach(function (item){
-			debugger;
-					
-				L.marker([item[0], item[1]]).addTo(map)
-				.bindPopup('A pretty CSS3 popup.<br> Easily customizable.') 
-				hien thi noi dung tren land mark
-				.openPopup(); 
-
-			}) */
 		</script>
     
    </body>
