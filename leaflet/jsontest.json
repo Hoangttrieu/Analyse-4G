@@ -4,212 +4,177 @@
             {
                 "lat": "48.104941",
                 "lon": "-1.6476",
-                "prop": "border",
-				"RSRP":"5"
+                "prop": "border"
             },
             {
                 "lat": "48.104917",
                 "lon": "-1.64778",
-                "prop": "inside",
-				"RSRP":"70"
+                "prop": "inside"
             },
             {
                 "lat": "48.105279",
                 "lon": "-1.647993",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.104941",
                 "lon": "-1.6476",
-                "prop": "border",
-				"RSRP":"10"
+                "prop": "border"
             },
             {
                 "lat": "48.104917",
                 "lon": "-1.64778",
-                "prop": "inside",
-				"RSRP":"16"
+                "prop": "inside"
             },
             {
                 "lat": "48.104889",
                 "lon": "-1.647958",
-                "prop": "inside",
-				"RSRP":"18"
+                "prop": "inside"
             },
             {
                 "lat": "48.104859",
                 "lon": "-1.648139",
-                "prop": "inside",
-				"RSRP":"12"
+                "prop": "inside"
             },
             {
                 "lat": "48.104828",
                 "lon": "-1.64832",
-                "prop": "inside",
-				"RSRP":"11"
+                "prop": "inside"
             },
             {
                 "lat": "48.10479",
                 "lon": "-1.648493",
-                "prop": "inside",
-				"RSRP":"75"
+                "prop": "inside"
             },
             {
                 "lat": "48.104744",
                 "lon": "-1.648653",
-                "prop": "inside",
-				"RSRP":"81"
+                "prop": "inside"
             },
             {
                 "lat": "48.10469",
                 "lon": "-1.648803",
-                "prop": "inside",
-				"RSRP":"16"
+                "prop": "inside"
             },
             {
                 "lat": "48.10463",
                 "lon": "-1.648947",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.104561",
                 "lon": "-1.649082",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.104494",
                 "lon": "-1.649209",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.104441",
                 "lon": "-1.649326",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.104398",
                 "lon": "-1.649439",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.10436",
                 "lon": "-1.649541",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.10436",
                 "lon": "-1.649541",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.104281",
                 "lon": "-1.64971",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.104246",
                 "lon": "-1.649776",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.104246",
                 "lon": "-1.649776",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.104203",
                 "lon": "-1.649863",
-                "prop": "inside",
-				"RSRP":"1"
+                "prop": "inside"
             },
             {
                 "lat": "48.104186",
                 "lon": "-1.649913",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.104178",
                 "lon": "-1.649974",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.104178",
                 "lon": "-1.649974",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.104217",
                 "lon": "-1.650071",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.104265",
                 "lon": "-1.650117",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.104326",
                 "lon": "-1.650158",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.104396",
                 "lon": "-1.650198",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.104476",
                 "lon": "-1.650239",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.10455",
                 "lon": "-1.650267",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.10455",
                 "lon": "-1.650267",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.105279",
                 "lon": "-1.647993",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.105279",
                 "lon": "-1.647993",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             },
             {
                 "lat": "48.105279",
                 "lon": "-1.648172",
-                "prop": "border",
-				"RSRP":"1"
+                "prop": "border"
             }
         ]
     }]

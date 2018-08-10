@@ -28,9 +28,7 @@ def __main__(listfiles):
       trace=traceFromJson(filename,operaters[oper])
       TACtable = trace.createTactable()
       pcitable = trace.createPCItable()
-      MLmessages.writeTAList(TACtable,operaters[oper])
       trace.cellInfo(TACtable, pcitable, operaters[oper])
-
 __main__([r"C:\Users\Trieu Hoang\Desktop\ZKCellTest\zk_0000013797_20180802094559.txt",
           r"C:\Users\Trieu Hoang\Desktop\ZKCellTest\zk_0000013797_20180802100635.txt",
           r"C:\Users\Trieu Hoang\Desktop\ZKCellTest\zk_0000013797_20180802102951.txt"])
