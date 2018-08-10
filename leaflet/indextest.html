@@ -6,37 +6,31 @@
       
       <script type='text/javascript' src='https://code.jquery.com/jquery-3.3.1.min.js'></script>
       <script type='text/javascript' src='library/leaflet/leaflet.js'></script>
+	   <script type='text/javascript' src='library/leaflet/HeatLayer.js'></script>
+	   	   <script type='text/javascript' src='library/leaflet/leaflet-heat.js'></script>
 	   <script type='text/javascript' src='library/turfjs/turf.min.js'></script>
-	   <style>
-		.custom-icon {
-		  width: 3rem;
-		  height: 3rem;
-		  display: block;
-		  position: relative;
-		  border-radius: 3rem 3rem 0;
-		  transform: rotate(45deg);
-		  border: 1px solid #FFFFFF
-		}
-	   </style>
+	  
    </head>
  
    <body>
-		<h1>Leaflet Example</h1> 
-		<!-- <p>Here's a map of the countries I've either lived in or travelled through for a month or more. -->
+		<h1>Cellulars in Rennes</h1> 
+		<!-- <p>Here's a map of the cellulars in Bretagne. -->
 		<div id="map" style="float: left; height: 600px; width: 1200px; border: 1px solid #AAA;"></div>
 		<div id="note" style="float: left; padding-left: 50px;"></div>
 		
 		
 		<script>
-		var map = L.map('map').setView([48.174665, -2.010904], 10);
+		
 
 		//L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		//	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			//}).addTo(map);
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		var baselayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-			}).addTo(map);
-			
+			});//.addTo(map);
+		var heatpoints=[]
+		var heatmap = L.heatLayer(heatpoints,{config});
+		var map = L.map('map',{center:[48.174665, -2.010904],zoom:15,layers:[baselayer,heatmap]});
 		var cellJsonList = [];
 		var skip = 0;
 		var take = 1;
@@ -46,35 +40,37 @@
 				"features" : []
 			}
 		var markerGroup = L.layerGroup();
+		var polygons = L.layerGroup();
 		
+		var basemap={"baselayer":baselayer}
+		var heatmaps={"Heatmap":heatmap}
 
-		const icon = L.divIcon({
-		  className: 'leaflet-div-icon custom-icon',
-		  iconAnchor: [0, 24],
-		  labelAnchor: [-6, 0],
-		  popupAnchor: [0, -36],
-		 // html: `<span style="${markerHtmlStyles}" />`
-		})
 		
-		L.marker([48.174665, -2.010904], {icon: icon}).addTo(map);
-		
-		
-		
+		L.control.layers(basemap,heatmaps).addTo(map);
 		$(document).ready(function(){
 			
-			$.getJSON("CellInformation_phone_2.json", function(jsonList) {
+			$.getJSON("jsontest.json", function(jsonList) {
 				$("#note").append("<p>Cell list count: " + jsonList.length +"</p>")
 				cellJsonList = jsonList;	
-				drawCell();
+				jsonList.forEach(function(cell){
+					heatpoints = heatpoints.concat(Heatpoints(cell));
+				})
+				//var heatmap = L.heatLayer(heatpoints, {config}).addTo(map)
+				//heatmap.addLatLng(heatpoints)
+				heatpoints.forEach(function(point){
+					heatmap.addLatLng(point)
+				})
+				//drawCell();
 			});
 			
 			map.on('dblclick',function(e){
 				map.removeLayer(markerGroup)
 				
-					drawCell();
+					//drawCell();
 					console.log('dblclick event');
-					
+					//console.log(polygons)
 			})
+			
 		});
 	
 		function drawCell(){
@@ -85,9 +81,9 @@
 				markerGroup.clearLayers();				
 				$("#note").append("<p>" + skip + " Cells were drawn</p>");
 				map.removeLayer(markerGroup)
-				var cellGeoList = [];
+			//	var cellGeoList = [];
 				list.forEach(function(item){
-					cellGeoList.push(createFeatureCollection(item))
+				//	cellGeoList.push(createFeatureCollection(item))
 					points=createpolygon(item)
 					pointinside.push(points[0])
 					pointborder.push(points[1])
@@ -99,23 +95,33 @@
 				})
 				pointborder.forEach(function(item){
 				
-					L.geoJSON([item,turf.concave(item)],{style: style}).addTo(map).bindPopup(item.properties).openPopup();
-
+				    var geoJsonLayer = L.geoJSON([item,turf.convex(item)],{style: style(0.6)});
+					geoJsonLayer.on('mouseover', function(e){
+						e.target.setStyle({fillOpacity:1});	
+					})
+					geoJsonLayer.addTo(polygons).bindPopup(item.properties);
+					geoJsonLayer.on('mouseout', function(e){
+						e.target.setStyle({fillOpacity:0.6});
+					})
 				})
+				
+				polygons.addTo(map);
 				markerGroup.addTo(map)
+				
+				
 		}
 		
 		
 		
-		function style() {
-			rand=Math.random()
+		function style(opacity) {
+			rand = Math.random()
 			return {
-			weight: 2,
-			opacity: 1,
-			color: '#'+(0x1000000+(rand)*0xffffff).toString(16).substr(1,6),
-			dashArray: '5',
-			fillOpacity: 0.6,
-			fillColor: '#'+(0x1000000+(rand)*0xffffff).toString(16).substr(1,6)
+				weight: 2,
+				opacity: 1,
+				color: '#'+(0x1000000+(rand)*0xffffff).toString(16).substr(1,6),
+				dashArray: '5',
+				fillOpacity: opacity,
+				fillColor: '#'+(0x1000000+(rand)*0xffffff).toString(16).substr(1,6)
 			};
 		}
 		
@@ -174,7 +180,29 @@
 			
 			return feature
 		}
-		
+		function Heatpoints(jsoncell){
+			var point=[];
+			jsoncell.features.forEach(function(item){
+				if (item.RSRP!=100){
+				point.push({"lat":item.lat,"lng":item.lon,"count":item.RSRP});
+				}
+			})
+			return point
+		}
+		//Heatmap configuration
+		var config = {
+		  "radius": 0.51,
+		  "minOpacity": 0.1, 
+		 // "max":_.maxBy(heatpoints, function(latLngDensity) { return latLngDensity[2]; })[2],
+		  "max" :97,
+		  "gradient": {
+			0.4:  'blue',//'#f23e45',
+			0.50: 'lime',
+			0.70: 'yellow',
+			0.95: 'orange',//'#FF8300',
+			1.0:  'red'
+		  }
+		};
 		</script>
     
    </body>
