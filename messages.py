@@ -135,19 +135,15 @@ class mlMessageList:
 
     def writeTAList(self,TACtable,oper):
        # nameFile = "%s.txt" % str(name+oper.getOperater())
-        path = getPathText(str(name)+".txt")
-        f = open(path, 'w')
-        for mess in message_list:
-            time = mess[2] + " " + str(mess[3])
-            # time = "2013-03-27" + " " + str(mess[3])
-            f.write(time)
-            f.write("\n")
-            f.write("0000")
-            for j in range(start_position, len(mess)):
-                f.write(" ")
-                f.write(str(mess[j]))
-            f.write("\n")
-        f.close()
+        tac=TACtable.drop(["geolocation"], axis=1)
+        Tactable=tac.drop_duplicates()
+        ta={"mcc":Tactable.iloc[0]["mcc"],"mnc":Tactable.iloc[0]["mnc"],"cell":[]}
+        for index, row in Tactable.iterrows():
+            ta["cell"].append({"cellId":row["CellID"],"PCI":row["PCI"],"EARFCN":row["EARFCN"]})
+        name= "TrackingAreaList" + "_"+oper.getOperater()+".txt"
+        with open(getPathText(name), 'w') as outfile:
+            json.dump(ta, outfile, indent=4, separators=(',', ': '), sort_keys=False)
+
 
 
 class plMessages():
